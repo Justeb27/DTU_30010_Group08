@@ -1,0 +1,122 @@
+**C Project Naming Conventions**
+
+---
+
+### **General File Naming Guidelines**
+
+1. **Use **``** for File Names**
+
+   - Example: `main.c`, `user_auth.c`, `math_utils.c`.
+
+2. **Pair Source and Header Files**
+
+   - Each `.c` file should have a corresponding `.h` file.
+   - Example: `user_auth.c` and `user_auth.h`.
+
+3. **Group Related Files**
+
+   - Use directories for organization:
+     - `src/`: Source files.
+     - `include/`: Header files.
+     - `lib/`: Libraries.
+     - `tests/`: Test files.
+
+4. **Descriptive File Names**
+
+   - Clearly indicate the file’s purpose.
+   - Example: `user_auth.c` (user authentication logic).
+
+5. **Specific Naming for Roles**
+
+   - Test files: Add `_test` suffix (e.g., `math_utils_test.c`).
+   - Configuration files: Use `config` in the name (e.g., `app_config.c`).
+   - Main entry point: Use `main.c`.
+
+6. **Avoid Reserved Words and Special Characters**
+
+   - Stick to alphanumeric characters and underscores.
+   - Avoid names like `math.c` to prevent conflicts with standard libraries.
+
+---
+
+### **Naming Variables, Functions, and Macros**
+
+1. **Variables and Functions: **``
+
+   - Variables: `user_count`, `is_authenticated`.
+   - Functions: `calculate_area`, `validate_user`.
+
+2. **Constants and Macros: **``
+
+   - Example:
+     ```c
+     #define MAX_USERS 100
+     #define PI 3.14159
+     ```
+
+3. **Structs, Enums, and Typedefs**
+
+   - Use `PascalCase` or `snake_case`:
+     ```c
+     typedef struct User {
+         int id;
+         char name[50];
+     } User;
+
+     typedef enum user_status {
+         ACTIVE,
+         INACTIVE
+     } user_status;
+     ```
+
+4. **File-Specific Prefixes for Public Symbols**
+
+   - Prefix functions or global variables with the file/module name.
+   - Example (from `math_utils.c`):
+     ```c
+     int math_utils_add(int a, int b);
+     ```
+
+---
+
+### **Folder Structure**
+
+Organize your project as follows:
+
+```
+project/
+├── src/
+│   ├── main.c
+│   ├── user_auth.c
+│   ├── math_utils.c
+├── include/
+│   ├── user_auth.h
+│   ├── math_utils.h
+├── tests/
+│   ├── user_auth_test.c
+│   ├── math_utils_test.c
+├── lib/
+│   ├── external_library.c
+│   ├── external_library.h
+├── Makefile
+├── README.md
+```
+
+---
+
+### **Tools to Enforce Standards**
+
+1. **Static Analysis Tools**
+
+   - Use `clang-format` to enforce consistent formatting.
+
+2. **Code Reviews**
+
+   - Include naming conventions in your review checklist.
+
+3. **Documentation**
+
+   - Add these conventions to your README or `CONTRIBUTING.md` file.
+
+---
+
