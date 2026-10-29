@@ -1,0 +1,244 @@
+\documentclass[12pt,oneside,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=2.25cm,headheight=26pt,includeheadfoot]{geometry}
+\usepackage[danish]{babel}
+\usepackage{titlesec}
+\usepackage{titling}
+\usepackage[framed, numbered]{matlab-prettifier}
+\usepackage{changepage}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{caption}
+\usepackage{tocloft}
+\usepackage{setspace}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage{comment}
+\usepackage{booktabs}
+\usepackage{indentfirst}
+\usepackage{lscape}
+\usepackage[flushleft]{threeparttable}
+\usepackage{xcolor}
+
+% --- Danish Translation Fixes ---
+\addto\captionsdanish{
+  \renewcommand{\contentsname}{Indholdsfortegnelse}
+  \renewcommand{\listfigurename}{Liste over figurer}
+  \renewcommand{\listtablename}{Liste over tabeller}
+  \renewcommand{\abstractname}{Resumé}
+  \renewcommand{\refname}{Referencer}
+  \renewcommand{\bibname}{Bibliografi}
+  \renewcommand{\appendixname}{Appendiks}
+  \renewcommand{\indexname}{Indeks}
+  \renewcommand{\figurename}{Figur}
+  \renewcommand{\tablename}{Tabel}
+  \renewcommand{\partname}{Del}
+  \renewcommand{\chaptername}{Kapitel}
+  \renewcommand{\sectionname}{Afsnit}
+  \renewcommand{\subsectionname}{Underafsnit}
+  \renewcommand{\authorname}{Forfatter}
+  \renewcommand{\date}{\today}
+}
+
+% --- Fancyhdr Configuration ---
+\pagestyle{fancy}
+\fancyhf{}
+\setlength{\parindent}{2em}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+\lhead{Programmeringsprojekt (30010)\\ Starfighter}
+\rhead{\nouppercase{\rightmark}}
+\fancyfoot[C]{Side \thepage\ af \pageref{LastPage}}
+\setlength\headheight{16pt}
+\setlength{\footskip}{50pt}
+
+% --- Code Configurations ---
+\usepackage{listings}
+\usepackage{color}
+
+\renewcommand{\lstlistingname}{Liste} % Changes "Listing" to "Liste"
+\renewcommand{\lstlistlistingname}{Lister} % Changes "List of Listings" to "Lister"
+
+\lstset{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{green!60!black},
+  stringstyle=\color{red},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  stepnumber=1,
+  numbersep=8pt,
+  showspaces=false,
+  showstringspaces=false,
+  frame=single,
+  breaklines=true,
+  captionpos=b
+}
+
+\newcommand{\cross}{\ensuremath{\times}}
+
+% --- End of page settings ---
+
+
+
+\begin{document}
+\pagenumbering{roman} 
+\input{chapters/00_frontpage.tex}
+
+\newpage
+\doublespacing
+\renewcommand{\baselinestretch}{1}\normalsize
+\tableofcontents
+\renewcommand{\baselinestretch}{1}\normalsize
+\thispagestyle{fancy} % force page style
+
+
+\newpage
+\pagenumbering{arabic} 
+\fancyfoot[C]{Side \thepage\ af \pageref{EndOfText}}
+
+\newpage
+\section*{Resumé} \label{Res}
+\input{chapters/Abstract.tex} 
+\section*{Abstract} \label{Abs}
+\input{chapters/Resumé.tex} 
+
+\newpage
+\section{Introduktion} \label{ch1}
+\input{chapters/01_introduction.tex} 
+
+\newpage
+\section{Kravspecifikationer} \label{ch2}
+\input{chapters/02_Kravspecifikationer} 
+
+\newpage
+\section{Analyse} \label{ch3}
+\input{chapters/03_Analyse} 
+
+\newpage
+\section{Design} \label{ch4}
+\input{chapters/04_Design} 
+
+\newpage
+\section{Projektet} \label{ch5}
+\input{chapters/05_Projektet} 
+
+\newpage
+\section{Brugermanual} \label{ch6}
+\input{chapters/06_Brugermanual} 
+
+\newpage
+\section{Diskussion} \label{ch7}
+\input{chapters/07_Diskussion} 
+
+\newpage
+\section{Konklusion} \label{ch8}
+\input{chapters/08_Konklusion} 
+
+\label{EndOfText}
+
+
+\newpage
+\pagenumbering{Roman} 
+\addcontentsline{toc}{section}{Liste over figurer}
+\fancyfoot[C]{Side \thepage\ af \pageref{endOfDoc}}
+\listoffigures
+
+\newpage
+\addcontentsline{toc}{section}{Nomenklatur}
+\input{chapters/09_nomenclat.tex}
+
+\newpage
+\addcontentsline{toc}{section}{Referencer}
+\bibliography{document.bib} 
+\bibliographystyle{ieeetr}
+
+\newpage
+\section{Appendiks A} \label{ch10}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{figures/Main_flowchart.png}
+    \caption{main.c flowchart}
+    \label{fig:main_flowchart}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/GANTT_30010.png}
+    \caption{GANTT-chart}
+    \label{fig:GANTT_chart}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{figures/Block_diagram.png}
+    \caption{Block diagram}
+    \label{fig:block_diagram}
+\end{figure}
+
+\newpage
+\label{kode:If-sætninger til normalt fungerende 30010 joystick}
+\begin{lstlisting}[caption={If-sætninger til normalt fungerende 30010 joystick}] 
+if ((1900 < x) && (x < 2100) && (1900 < y) && (y < 2100)) {
+    new_value = 0;
+} else if ((1900 < x) && (x < 2100) && (3700 < y) && (y < 4100)) {
+    new_value = 8;
+} else if ((3700 < x) && (x < 4100) && (1900 < y) && (y < 2100)) {
+    new_value = 2;
+} else if ((1900 < x) && (x < 2100) && (0 < y) && (y < 400)) {
+    new_value = 4;
+} else if ((0 < x) && (x < 400) && (1900 < y) && (y < 2100)) {
+    new_value = 6;
+} else if ((3000 < x) && (x < 3700) && (3000 < y) && (y < 3700)) {
+    new_value = 1;
+} else if ((3000 < x) && (x < 3700) && (300 < y) && (y < 1500)) {
+    new_value = 3;
+} else if ((200 < x) && (x < 1300) && (200 < y) && (y < 1300)) {
+    new_value = 5;
+} else if ((200 < x) && (x < 1300) && (3000 < y) && (y < 3700)) {
+    new_value = 7;
+}
+\end{lstlisting}
+
+\newpage
+\pagenumbering{arabic}
+\section{Appendiks B - Source Code} \label{ch11}
+\input{Kode/Main.c} 
+\input{Kode/ansi.ch}
+\input{Kode/Background.ch}
+\input{Kode/Boss_key.ch}
+\input{Kode/Bullets.ch}
+\input{Kode/Collision_detection.ch}
+\input{Kode/Enemy.ch}
+\input{Kode/Gamemenu.ch}
+\input{Kode/Gamestart.ch}
+\input{Kode/Gravity.ch}
+\input{Kode/Helpmenu.ch}
+\input{Kode/init_GPIO.ch}
+\input{Kode/Joystick_reader.ch}
+\input{Kode/LCD.ch}
+\input{Kode/Led.ch}
+\input{Kode/Mainmenu.ch}
+\input{Kode/Movement.ch}
+\input{Kode/Powerups.ch}
+\input{Kode/Spaceship.ch}
+\input{Kode/Spawn_powerups.ch}
+\input{Kode/Timer.ch}
+\input{Kode/Title.ch}
+
+
+\newpage
+\section{Appendix C - Exercise journal} \label{ch12}
+\input{Journals/Journals}
+
+
+
+
+\label{endOfDoc}
+\end{document}

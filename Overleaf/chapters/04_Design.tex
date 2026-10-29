@@ -1,0 +1,80 @@
+\subsection{Kvalitetssikring}
+Kvalitetssikring er en central del af projektet for at sikre, at spillet fungerer stabilt og opfylder alle krav. For at opnå dette har vi implementeret flere strategier til at teste systemets funktionalitet og sikre robustheden af vores kode.\\
+Sideløbende med udviklingen af de individuelle moduler har vi testet dem hyppigt for at sikre, at de fungerer som forventet. Der opstår ofte problemer, når modulerne implementeres i en main-løkke, men disse er lettere at løse, hvis de individuelle dele allerede er verificeret.\\
+Når vi støder på udfordringer med at finde fejl i koden, bruger vi debuggingværktøjerne, der er en del af STM32CubeIDE. Denne tilgang hjælper os med at finde og rette logiske fejl samt løse kommunikationsproblemer mellem softwarelagene.
+
+\subsection{Hardware- og tidsmæssige begrænsninger}
+En af de største udfordringer ved dette projekt er at arbejde inden for de begrænsninger, som STM32-mikrocontrolleren stiller. Selvom STM32-platformen er meget alsidig, udgør den stadig en væsentlig begrænsning ift. RAM og ROM. Dette betyder, at vi konstant skal overveje, hvordan vi udnytter de ressourcer, den stiller til rådighed.
+Spillets funktioner skal være optimeret, så spillet kører gnidningsfrit og optimalt, uden at overbelaste mikrocontrolleren. Derudover skal antallet af globale variabler være minimeret, og der sikres, at vores funktioner kun bruger de nødvendige ressourcer.\\
+Med kun to uger til rådighed har det tidsmæssige pres gjordt det nødvendigt at balancere mellem design, implementering og test af spillet, hvilket har krævet en stram tidsplan og klare prioriteringer. De essentielle funktioner er prioriteret først – såsom joystickstyring, kollision og skudmekanik – før vi tilføjede avancerede funktioner som "power-ups" og RGB-indikatorer. Grundet den faste tidsramme, skaber prioriteringen en buffer, som i tilfælde af at tidsplanen skubbes, stadig efterlader os med et funktionelt spil.\\
+
+Spillet indeholder en global varibel, hvilket er \textit{cs}. Den er implimenteret for at holde styr på alle vores variabler. Den kaldes hver gang, der bliver lavet interupt af den indbyggede timer i mikrocontrolleren, hvilken øger dens værdi med én.
+\begin{lstlisting}[caption={Timer kode}]
+void TIM1_BRK_TIM15_IRQHandler(void) {
+    cs++;
+    TIM15->SR &= ~0x0001; // Clear interrupt bit
+}
+\end{lstlisting}
+
+
+
+\subsection{Grafisk design}
+Det grafisk design er lavet med ASCII-tegn, da det grundet tidligere erfaringer har vidst sig at være en nem og tilstrækkelig måde at opbygge spillet på. Grundet tekniske forskelle i størrelse af computer/laptop skærme, blev terminalens opløsning bestemt til 243x76 pixels. Dette er med til at sikre at spillet kan køres optimalt på samtlige computerer og give den sammen bruger oplevelse, uden yderligere visuelle begrænsninger.\\
+
+
+Dette gør det muligt at prioritere gameplay og funktionelle krav uden at introducere unødvendige kompatibilitetsproblemer forårsaget af skift i opløsningen. Derudover gør dette det muligt at "hard-code" vores grafik til præcist denne opløsning.\\
+Generelt blev avanceret grafik nedprioriteret gennem forløbet af to årsager: Den første er fordi det er meget ensformigt og tidskrævende at kode store figurer med ASCII-tegn. Den anden skyldes problemer med opdatering af terminalen, da samtlige objekter på skærmen blev hhv. slettet og genprintet for at skabe følelsen af at de bevægede sig. Simplerer figurer og karakterer er derfor foretrukket grundet, at de er lettere at manipulerer med. Det simple udtryk passer også godt til det overordnede "Space Invaders"-tema.
+
+\subsubsection{Grafikkens bevægelse}
+Vi afprøvede forskellige metoder til at optimere animationen af grafikken, blandt andet ved at øge Baud-raten, som påvirker print-hastigheden i terminalen. Vi startede med en Baud-rate på 9600, men opdagede hurtigt, at bevægelser i terminalen (fx et skud, der flyttede sig) var meget langsomme og forsinkede. Derfor undersøgte vi muligheden for at øge Baud-raten og opdagede, at \(115.200\) fungerede godt. Denne hastighed kunne håndtere mere bevægelse, så længe der kun var én bevægende del ad gangen.\\
+Da vi begyndte at introducere større figurer og grafik, der skulle bevæge sig over baggrunden, blev det dog tydeligt, at dette ikke var tilstrækkeligt.I den konfiguration, vi brugte, anvendte vi en \textit{clrscr}-funktion, som ryddede hele skærmen og derefter tegnede baggrunden og den opdaterede grafik. Denne tilgang var for tidskrævende og skabte forstyrrelser i den jævne overgang mellem grafikkens positioner.\\
+For at løse dette optimerede vi baggrundsfunktionen \textit{init\_baggrund}, så den nu tager fire parametre, der repræsenterer koordinaterne for hjørnerne af en firkant. Dette gør det muligt kun at opdatere de baggrundsdele, der bliver påvirket af bevægelsen. Derudover udviklede vi en ny funktion til at rydde skærmen selektivt, så kun de relevante dele af grafikken blev fjernet. Både aliens og meteorer bevægede sig meget forudsigeligt, hvilket gjorde det oplagt kun at slette og tegne de relevante dele af dem ved opdatering af deres bevægelse.\\
+En anden vigtig optimering, vi implementerede, var at skifte fra if-sætninger til switch-sætninger flere steder i koden, der håndterer objekters bevægelser og handlinger. Ved at anvende switch-sætninger reducerede vi kompleksiteten og forbedrede læsbarheden af koden, samtidig med at vi optimerede dens ydeevne. Dette skyldes, at switch-sætninger er mere effektive til at håndtere flere mulige cases sammenlignet med lange kæder af if-else-sætninger, især når mange scenarier skal behandles.\\
+Disse forbedringer resulterede i en mere jævn og effektiv opdatering af baggrunden og grafikken. Selvom disse ændringer fik spillet til at køre tilfredsstillende, valgte vi at øge Baud-raten til \(345.600\), hvilket på vores computere var den maksimale hastighed uden tilfældige fejl. Dette resulterede i, at spillet kørte både bedre og hurtigere, hvilket markant forbedrede spiloplevelsen.
+
+\subsection{System abstraktionslag}
+Vi anvender en lagdelt struktur i vores projekt. Dette sikrer både en tydelig struktur og høj effektivitet i vores arbejde. Denne struktur hjælper os med at holde styr på prioriteringerne, da funktionaliteten i Hardware Abstraction Layer (HAL) skal være på plads, før elementer i Application Layer kan fungere. I det følgende beskrives de tre lag, samt hvilke filer der indgår i projektet, og hvad deres funktion er.
+
+\subsubsection{Application layer}
+Til vores application layer opretter vi en mappe kaldet "graphics". Her placerer vi alt spilgrafik, bortset fra de forskellige spil-menuer og boss-key, som også indeholder noget grafik.\\
+Det første, vi udvikler i "graphics"-mappen, er baggrunden. Vi starter med funktionen \textit{bigplanet}, som tegner en planet med to farver på en given position. Oprindeligt ønskede vi at bruge planeter som baggrund under spillet, men det krævede for mange ressourcer at gentegne dem, når noget bevægede sig over dem. Derfor valgte vi at bruge planeterne udelukkende i menuen \textit{game\_start}, hvor gentegning ikke var nødvendig.\\
+Til baggrunden tilføjede vi \textit{stars}, som placerede "*" forskellige steder på skærmen for at simulere stjerner. Selvom vi overvejede at bruge en funktion til at generere deres placeringer tilfældigt, valgte vi i sidste ende at hardkode deres positioner. For det første er det mere effektivt for mikrocontrolleren at arbejde med hardcodede positioner, og for det andet er det nemmere at genskabe baggrunden, når stjernernes placering kendes præcist. Ulempen ved denne tilgang er, at hardcodning gør funktionen mindre genanvendelig.
+Da vi startede med to funktioner (\textit{big\_planet} og \textit{stars}), udviklede vi også \textit{init\_background}, som skulle kombinere disse funktioner til én samlet baggrund. I praksis endte \textit{init\_background} dog med kun at kalde \textit{stars}-funktionen.
+\newline
+\textbf{Enemy}
+\newline
+Til fjender starter vi med at fastlægge grafikken. Vi vælger en simpel grafik, da den skal bevæge sig og opdateres ofte.
+
+Funktionen \textit{Init\_enemy\_state} initialiserer fjenderne ved at sætte alle elementer i både \textit{aliens\_array} og \textit{meteors\_array} til inaktive.
+
+Når der findes en inaktiv meteor, sørger \textit{spawn\_meteor} for at placere den i højre side af skærmen og sætte den til aktiv. \textit{Spawn\_alien} fungerer lidt anderledes, da den også tjekker, hvor lang tid der er gået siden den sidste alien blev spawnet, før en ny alien skabes.
+
+I funktionen \textit{enemy\_go} opdateres både meteorer og aliens. Meteorer genereres, flyttes mod venstre på skærmen og opdateres. For aliens sker det samme, men deres grafik gør processen en smule mere kompleks.
+\newline
+\textbf{Powerup}
+\newline
+I \textit{powerup} er der kun 2 funktioner: \textit{powerup} og drawwindow. \textit{Drawwindow} funktionen tegner et 16x8 vindue med en bestemt farve. Vinduet bliver lavet med ASCII-karakterer. I \textit{powerup} tegnes vinduet fra \textit{drawwindow} og midten af dette beregnes. Funktionen tager så nogle cases alt efter hvilken powerup der skal tegnes. Her har vi 3: Laser, hjerte og shotgun.
+\newline
+\textbf{Spaceship}
+\newline
+Da vi udvikler grafikken til rumskibet, beslutter vi, at det skal kunne dreje i fire retninger. Derfor skaber vi fire forskellige grafikker til rumskibet. Ideelt set ville vi gerne have haft otte retninger, så det kunne dække alle bevægelsesretninger, men vi støder på begrænsninger med ASCII-tegn, da det er svært at designe et rumskib, der eksempelvis peger 45 grader opad.
+
+Vi laver to forskellige designs: ét, der håndterer retningen opad, og ét, der peger mod højre. Disse designs inverterer vi for at dække alle fire retninger. De fire grafikker samles i funktionen \textit{draw\_spaceship}, som tegner én af de fire mulige orienteringer baseret på dens parameter.
+\newline
+
+\subsubsection{Application interface layer}
+\textbf{ANSI}
+\newline
+I graphics-mappen findes vores ansi-fil, der giver adgang til ANSI escape-sekvenser. Disse sekvenser gør det muligt at skrive funktioner som \textit{fgcolor}, der sætter forgrundsfarven for teksten i terminalen, \textit{bgcolor}, der sætter baggrundsfarven, og \textit{resetbgcolor}, der nulstiller farverne.
+
+Ansi-filen bruger ASCII-tegn, så eksempelvis vil \textit{fgcolor(6)} sætte forgrundsfarven til cyan.
+\newline
+\textbf{LCD}
+\newline
+LCD'ens funktion er at fremvise spillerens liv, point samt hvilken \textit{bullet-type} spilleren har aktiveret. Livet er visualiseret med tre hjerter i topvenstre hjørne, som opdateres i realtid med at spilleren mister liv i spillet. Funktionen \textit{hearts} tager en startsposition som input og printer et enkelt hjerte. Startspositionen er baseret på, hvor på LCD-skærmen vi ønsker at placere hjertet. LCD-skærmen er opdelt i 512 bytefelter, som yderligere er opdelt i 4 rækker med hhv. 128 byte felter i hver.  Displayet fungerer ved at 
+
+
+\subsubsection{Hardware abstraction layer}
+
+\textbf{30010 joystick}\\
+30010-joysticket blev sat op efter \textit{Assignment 8} i kurset 30010 på DTU \cite{lecture_notes_uge_2}. Under \textit{joystick\_reader.c} i funktionen\textit{ configure\_adv\_joystick} kan det ses, at ADC1 bruges til at konvertere det analoge signal til et digitalt. Pin C2 og C3 bliver brugt til at modtage joystickpositionen. For at aflæse joystickets \(x\)- og \(y\)-koordinat bruges channel 8 og 9 som der bruges til vores pinopsætning\cite{Reference_Manual_RM0365}. De to funktioner read\_adv\_joystick\_x og -y returnerer værdien fra joystickens to akser. Disse to funktioner bliver videre brugt til kategorisering af joystickens retning som kan ses under funktionen read\_joystick Pin C10 og C12 bliver brugt til at aflæse de to knappers input. Alle fire pins bliver sat til pull-down registre der måler en spændingsforskel når de bliver trykket.

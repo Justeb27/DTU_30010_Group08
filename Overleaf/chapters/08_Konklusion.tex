@@ -1,0 +1,94 @@
+Spillet \textit{Starfighter} opfylder de kravspecifikationer, som er givet i opgaveformuleringen. Spillet er skrevet i programmeringssproget C og kører på en STM32-mikrocontroller med eksternt tilsluttet joystick 30010. Spilleren kan navigere spillet og menuen via joysticket, affyreskud, kolliderer med fjender og objekter, opnå midlertidige power-ups, samtidigt med at liv, point og skud-typer er visualiseret på den tilhørende LCD-skærm. Spillet indeholder hardware og software elementer, som let kan genanvendes i en videreudvikling af lignende projekter. \\
+
+
+
+
+
+
+
+
+
+
+\subsection{Hvem gjorde hvad i STM32-IDE}
+Oversigt over hvem har lavet hvilke filer under Src mappen i vores StarFighter projekt i STM32-IDE.
+
+\begin{center}
+\begin{tabular}{||c|c|c|c|c||}
+ \hline
+  & August & Carl & Jacob & Simon \\ [0.5ex]
+ \hline\hline
+ boss\_key.c &  & \cross & \cross & \\ 
+ \hline
+ bullets.c &  &  &  & \cross \\
+ \hline
+ collision\_detection.c &  &  &  & \cross \\
+ \hline
+ gravity.c &  &  &  & \cross \\
+ \hline
+ led.c &  & \cross &  & \cross \\
+ \hline
+ movement.c &  &  &  & \cross \\
+ \hline
+ spawn\_powerups.c &  &  &  & \cross \\
+ \hline
+ background.c & \cross &  & \cross & \\
+ \hline
+ enemy.c &  &  &  & \cross \\
+ \hline
+ lcd.c &  & \cross &  & \\
+ \hline
+ powerup.c & \cross &  &  & \\
+ \hline
+ spaceship.c & \cross &  &  & \\
+ \hline
+ title.c &  & \cross & \cross & \\
+ \hline
+ init\_GPIO.c &  &  &  & \cross \\
+ \hline
+ joystick\_reader.c &  &  & \cross & \\
+ \hline
+ timer.c &  & \cross &  & \cross \\
+ \hline
+ game\_menu.c &  &  & \cross & \cross \\
+ \hline
+ help\_menu.c &  &  & \cross & \\
+ \hline
+ 30010\_io.c &  &  &  & \\
+ \hline
+ main.c & \cross &  & \cross & \\
+ \hline
+ Samlet tid i alt  & 45 timer  & 55 timer & 55 timer & 65 timer \\ [0.5ex]
+ \hline
+\end{tabular}
+\end{center}
+
+\subsection {Hvem gjorde hvad i rapporten}
+Oversigt over hvem der har lavet væsentlige bidrag til hvad i rapporten.
+
+\begin{center}
+\begin{tabular}{||c|c|c|c|c||} 
+ \hline
+  & August & Carl & Jacob & Simon \\ [0.5ex] 
+ \hline\hline
+ Abstract/Resume & &\cross & & \cross \\
+ \hline
+ Introduktion & \cross  &  & \cross & \\ 
+ \hline
+ Kravspecifikationer & \cross  &  &  & \\
+ \hline
+ Analyse  &  & \cross & \cross & \cross \\
+ \hline
+ Design  & \cross &  \cross &  & \cross \\
+ \hline
+ Projektet  & \cross  &  &  & \\
+ \hline
+ Brugermanual  &  &  & \cross & \cross \\
+ \hline
+ Diskussion  & \cross  & \cross & \cross & \cross \\
+ \hline
+ Konklusion  &  & \cross &  &  \\
+ \hline
+Samlet tid i alt  & 25 timer  & 25 timer & 19 timer & 20 timer\\ [0.5ex]
+ \hline
+\end{tabular}
+\end{center}

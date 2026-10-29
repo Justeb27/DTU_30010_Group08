@@ -1,0 +1,33 @@
+\subsection{Minimumskrav}
+Spillet skal kunne køre på en STM32-mikrocontroller med begrænset hardware, og systemet skal være robust over for spillerens inputs.\\
+Spilleren skal kunne navigere skibet op, ned, til højre og venstre ved hjælp af joysticket samt affyre skud ved at trykke på en knap. Desuden skal spilleren have adgang til en "Boss Key", som skal kunne aktiveres nemt og hurtigt via en af knapperne på joysticket. Spillet skal understøtte flere skudtyper og inkludere tre skydefunktioner: "Laser", "Standard" og "Shotgun", som kan aktiveres af power-ups. Skuddene skal påvirkes af en tilfældig vinkel (random delta). Der skal implementeres kollision mellem skud og fjender, som registreres og fjerner fjenden. Spilleren skal starte med et fast antal liv, som reduceres ved kollision med fjender eller meteorer, eller hvis fjender ikke dræbes, før de rammer skærmens bagside. På den måde er spillerens mål at skyde og eliminere fjenderne, før de forsvinder.\\
+Når spilleren mister alle liv, skal spillet afsluttes, og scoren skal vises på LCD-skærmen. Under spillet viser LCD-skærmen spillerens liv, point og den valgte skudtype, hvilket opdateres løbende under spillet.\\
+Spillet skal visualiseres i terminalen, hvor skib, skud, fjender og meteorer vises. Teksten "Game Over" skal vises i terminalen, når spillet slutter. RGB-LED'en skal vise antallet af liv tilbage: Grønt lys indikerer tre liv, blåt lys indikerer to liv, og rødt lys indikerer ét liv. LED-skærmen skal slukke, når alle liv er tabt.\\
+Koden skal skrives modulært, så nye funktioner som flere fjendetyper eller power-ups nemt kan tilføjes.
+
+\subsection*{Ekstra funktioner}
+Der skal tilføjes flere niveauer, der løbende stiger i sværhedsgrad under spillet. I de forskellige niveauer kan spillets sværhedsgrad øges ved at øge fjendernes og meteorernes hastighed eller deres antal. Man kan også gøre fjenderne mindre og meteorerne større, så det bliver udfordrende at ramme fjender, samtidig med at man undviger meteorer. For at undgå at overbelaste mikrocontrolleren er det dog mest hensigtsmæssigt at øge hastigheden på fjender og meteorer fremfor at tilføje flere.
+
+Funktionerne under "\textbf{Minimumskrav}" er prioriterede, fordi de er afgørende for spillets kernefunktionalitet og nødvendige for at gøre det spilbart. Disse funktioner danner fundamentet for spillet og er valgt ud fra deres relevans i forhold til spillets mål og projektbeskrivelsen. Det er vigtigt, at spillet opfylder de grundlæggende krav og er stabilt i sin basisform.
+
+"\textbf{Ekstra funktioner}" inkluderer funktioner, der kan forbedre spiloplevelsen og gøre spillet mere interessant og varieret, men som ikke er nødvendige for, at spillet kan fungere. Disse funktioner kan implementeres løbende, når det essentielle er på plads, og hvis der er tilstrækkelige ressourcer og tid til rådighed.
+
+\begin{itemize}
+    \item Systemet skal kunne klare forkerte inputs og fejl i joystick og knapper.
+    \item Spilleren skal kunne styre skibet op, ned, til højre og venstre med joysticket.
+    \item Spilleren skal kunne affyre skud ved at trykke på en knap.
+    \item En "Boss Key" skal kunne aktiveres nemt via en knap på joysticket.
+    \item Spillet skal understøtte flere skud-typer "Laser", "Normal", "Shotgun", aktiveret via power-ups.
+    \item Skud skal påvirkes af en tilfældig deltavinkel.
+    \item Kollision mellem skud og fjender skal registreres og fjenderne fjernes.
+    \item Spilleren starter med tre liv, som reduceres ved:
+    \begin{itemize}
+        \item Kollision med fjender eller meteorer.
+        \item Fjender, der undslipper og når skærmens bagside.
+    \end{itemize}
+    \item Spillet slutter, når spilleren mister alle liv, og scoren vises på LCD-skærmen.
+    \item LCD-skærmen viser spillerens liv, point og valgte skud-type, opdateres løbende.
+    \item Joysticket skal bruges til skibets bevægelser og menu-navigation.
+    \item Koden skal skrives modulært for nemt at kunne tilføje nye funktioner, fjendetyper eller power-ups.
+    \item Nye niveauer med stigende sværhedsgrad skal implementeres.
+\end{itemize}

@@ -1,0 +1,119 @@
+\subsection{Projektets styrker og svagheder}
+\subsubsection{Styrker}
+En af projektets største styrker er den modulære arkitektur, som udgør fundamentet for projektets design. Den modulære tilgang gør det muligt at arbejde parallelt på forskellige moduler og samle dem senere. Konsekvent spiltestning og debugging sikrer, at større bugs og problemer undgås senere i udviklingsprocessen.\\
+Derudover indeholder projektet en række avancerede funktioner og udnytter mange af de indbyggede egenskaber i STM32CubeIDE, såsom LCD-skærmen. Dette forbedrer både brugerens spiloplevelse og gør spillet mere unikt.
+
+\subsubsection{Svagheder}
+En af de største udfordringer er projektets tidsbegrænsninger: Man skal både lære C og udvikle et spil på blot tre uger. Selvom man har en klar plan, kan nogle opgaver vise sig at være væsentligt mere tidskrævende, end man oprindeligt forudser. Dette kan føre til, at man uforudset må nedprioritere funktioner, der forbedrer spilleoplevelsen, for i stedet at fokusere på de grundlæggende funktioner.\\
+Det komplekse miljø i STM32CubeIDE er desuden svært at navigere for begyndere i C. Der opstår mange udfordringer, når man skal forstå den omfattende brugermanual på over 1000 sider og samtidig håndtere maskinens skavanker. Desuden har forskellige programmører ofte forskellige skrivestile, og uden en klart aftalt navngivningskonvention for filer og funktioner kan det skabe problemer.\\
+Alt dette kan skabe udfordringer under implementeringen af koden, men det er stadig overkommeligt. Vi aftalte for eksempel tidligt at bruge snake_case og sørgede for at implementere det konsekvent undervejs.
+
+\subsection{Joystick-implementering}
+Ved implementeringen af 30010-joysticket stødte vi på flere problemer. Med et analogt signal på 12 bits ville man forvente, at den læste en signalstyrke mellem 0 og 4095. Vi målte dog værdier mellem 750 og 3500 med mindre variation mellem joystickets \(x\)- og \(y\)-akse.\\
+Dette resulterede i, at if-sætningerne blev konfigureret baseret på vores målinger. Disse if-sætninger ville ikke fungere korrekt, hvis 30010-joysticket virkede normalt.\\
+I appendix findes kode til brug med et normalt fungerende joystick (\ref{kode:If-sætninger til normalt fungerende 30010 joystick}). Denne kode skal indsættes i if-sætningerne i funktionen \textit{read\_joystick()} i filen \textit{joystick\_reader.c}, som findes i mappen \textit{init}.
+
+\subsection{Krav}
+\begin{itemize}
+    \item Systemet skal kunne klare forkerte inputs og fejl i joystick og knapper.
+\end{itemize}
+Systemet reagerer ikke på ugyldige inputs, og dermed er dette ikke et problem. Hvis man for eksempel er i "Help Menu", og klikker på den hvide knap, sker der ingenting.
+
+\begin{itemize}
+    \item Spilleren skal kunne styre skibet op, ned, til højre og venstre med joysticket.
+\end{itemize}
+I spillet kan man styre skibet i otte retninger, dog kan grafikken kun vise fire retninger. Det sker, da grafikken er lavet med ASCII-karakterer, og vi konluderede, at et diagonalt rumskib ikke kan eksekveres pænt.
+
+\begin{itemize}
+    \item Spilleren skal kunne affyre skud ved at trykke på en knap.
+\end{itemize}
+Man kan skyde i 8 forskellige retninger. Det kræver dog meget processorkraft i mikrocontrolleren, hvilket resulterer i, at man må begrænse antallet af skud.
+
+\begin{itemize}
+    \item En "Boss Key" skal kunne aktiveres nemt via en knap på joysticket.
+\end{itemize}
+Der er implementeret en boss-key, som viser et portræt og en lommeregner lavet med ASCII-karakterer. Boss-key'en pauser spillet og scoren indtil man klikker på den igen.
+
+\begin{itemize}
+    \item Spillet skal understøtte flere skud-typer "Laser", "Normal", "Shotgun", aktiveret via power-ups.
+\end{itemize}
+Spillet har 3 power-ups: "Laser", "Shotgun" og "Health". Når man starter spillet bruger rumskibet standard skud, indtil man får en power-up.
+
+\begin{itemize}
+    \item Skud skal påvirkes af en tilfældig deltavinkel.
+\end{itemize}
+Vi havde implementeret en tilfældig deltavinkel, men da vi spiltestede det, gjorde det spilleoplevelsen væsentligt værre og væsentligt mere frustrerende. \\ Det var implementeret på følgende måde, hvor der var tilfældige udfald for alle rumskibets retninger:
+\begin{lstlisting}[caption={Tilfældig deltavinkel kode}]
+switch (pos->direction) {
+case 1:
+    switch (rand() % 3) {
+    case 0:
+        bullets_array[i].vx = 0;
+        bullets_array[i].vy = -1;
+        break;
+    case 1:
+        bullets_array[i].vx = 2;
+        bullets_array[i].vy = -1;
+        break;
+    case 2:
+        bullets_array[i].vx = 2;
+        bullets_array[i].vy = 0;
+        break;
+    }
+    break;
+case 2: ...
+\end{lstlisting}
+
+\begin{itemize}
+   \item Kollision mellem skud og fjender skal registreres og fjenderne fjernes.
+\end{itemize}
+Der er kollision mellem spilleren, bullets, aliens, meteorer og power-ups. Meteoren bliver ikke påvirket af noget, men stopper bullets, og spilleren mister alle liv, hvis rumskibet støder ind i den.
+
+\begin{itemize}
+    \item Spilleren starter med tre liv, som reduceres ved:
+    \begin{itemize}
+        \item Kollision med fjender eller meteorer.
+        \item Fjender, der undslipper og når skærmens bagside.
+    \end{itemize}
+\end{itemize}
+Dette er implementeret i spillet. Derudover er der tilføjet en power-up, der giver spilleren et ekstra liv, med mindre spilleren allerede har tre liv.
+
+\begin{itemize}
+    \item Spillet slutter, når spilleren mister alle liv, og scoren vises på LCD-skærmen.
+\end{itemize}
+Når man mister alle tre liv i spillet, vises der en "game-over" skærm og scoren pauses på LCD'en.
+
+\begin{itemize}
+    \item LCD-skærmen viser spillerens liv, point og valgte skud-type, opdateres løbende.
+\end{itemize}
+LCD'en er programmeret til at vise liv i øvre venstre hjørne, point i øvre højre hjørne, og skud typer i bunden. Alle disse værdier opdateres løbende, så de altid er ajourført.
+
+\begin{itemize}
+    \item Joysticket skal bruges til skibets bevægelser og menu-navigation.
+\end{itemize}
+I spillet kan en 30010 joystick bruges til at navigere i menuen, styre skibet i 8 retninger, affyre skud og aktivere boss-keyen.
+
+\begin{itemize}
+    \item Koden skal skrives modulært for nemt at kunne tilføje nye funktioner, fjendetyper eller power-ups.
+\end{itemize}
+Vores spil er modulært opbygget i 3 lag: AP, API og HAL. Dette gør det nemt at tilføje nye funktioner.
+
+\begin{itemize}
+    \item Nye niveauer med stigende sværhedsgrad skal implementeres.
+\end{itemize}
+Spillets niveauer stiger gradvist hen over en runde hvert 25'ende sekund. Der er implementeret 15 niveauer, men ved spiltestning har vi konstateret at spillet bliver meget svært allerede ved niveau fem. Niveauet kan ikke vælges fra menuskærmen, for at gøre GUI'en mere simpel. \\ Implementeringen ville dog nok se sådan her ud:
+\begin{lstlisting}[caption={Valg af sværhedsgrad kode}]
+void game_menu(void) {
+    ...
+    switch (difficulty) {
+    case 0: // Easy
+        uint8_t alien_speed = 20;
+        break;
+    case 1: // Normal
+        uint8_t alien_speed = 15;
+        break;
+    case 2: // Hard
+        uint8_t alien_speed = 10;
+        break;
+    } ...
+\end{lstlisting}

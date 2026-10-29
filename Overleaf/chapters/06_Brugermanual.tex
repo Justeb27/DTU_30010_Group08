@@ -1,0 +1,20 @@
+
+\subsection{Putty konfiguration}
+Sæt '\textit{Connection type}' til '\textit{Serial}' og '\textit{Serial line}' til den pågældende indgang MCU'en er tilsluttet til. Baudrate sættes til 345.600.
+
+\subsection{Spilstyring}
+Brug 30010-joysticket til at navigere rundt i menuerne, og brug B1 og B2 til at navigere ind i menuerne. Hjælp-menuen giver et kort resumé af spillet og dets udfordringer. Start-knappen initialiserer spillet, og du spawner  til venstre i midten af skærmen.\\
+LCD-skærmen aktiveres herefter, og du kan se både antallet af liv (også indikeret af LED’en) og din aktuelle score. Brug B2 til at skyde med den valgte ammunition. B1 aktiverer boss-key, som pauser din score. Et tryk på B2 bringer dig tilbage til spillet, præcis hvor du slap, før boss-key blev aktiveret.\\
+Du mister et liv, hvis du rammer en alien, eller hvis en alien når den venstre side af skærmen. En kollision mellem dit skib og en meteor dør du af. Power-ups aktiveres automatisk ved kollision med dem.\\
+Der findes tre power-ups, hver med deres unikke ikon: Shotgun, laser og heal. Shotgun affyrer tre skud ad gangen i hver sin retning. Laser affyrer en stråle, der kan trænge igennem både aliens og meteorer, og heal giver spilleren et ekstra liv. LCD’en indikerer, hvilken af de tre ammunitionstyper spilleren er udstyret med.\\
+Når spilleren mister alle sine liv, stopper spillet, og 'GAME OVER' vises på skærmen. Spilleren kan nu aflæse sin endelige score på LCD’en. Et tryk på en af knapperne sender spilleren tilbage til menuen, hvor spillet kan startes forfra.
+
+\subsection{\textbf{Pinopsætning}}
+\begin{itemize}
+    \item ADC1 -> PC\_3 
+    \item ADC2 -> PC\_2
+    \item GND -> GND 
+    \item VDD -> 3V3
+    \item B1 -> PC\_12
+    \item B2 -> PC\_10
+\end{itemize}

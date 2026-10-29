@@ -1,0 +1,158 @@
+Udviklingen og implementeringen af diverse funktioner er udført i overensstemmelse med blockdiagrammet, der starter med de mest grundlæggende funktioner og udvides derfra.
+
+\subsection{Spiltilstande}
+Vores main.c-fil indeholder tre separate spilstadier (\ref{fig:main_flowchart}). Disse er inddelt i tre menuer, som findes i menufolderen under Src-mappen i StarFighter. De tre menuer, der har deres egen fil, står for håndteringen af diverse spilrelevante filer udover initialiseringsfilerne i main.c.\\
+Variablen \textit{nav} gives som en pointer i hver spilmenu. Denne variabel opdateres i hver spilmenu afhængigt af spillerens input.
+\begin{lstlisting}[caption={Main-løkke kode}]
+uint8_t nav = 0;
+while (1) {
+    if (nav == 0) {
+        main_menu(&nav);
+    }
+    if (nav == 1) {
+        help_menu(&nav);
+    }
+    if (nav == 2) {
+        game_menu();
+        game_over(&nav);
+    }
+}
+\end{lstlisting}
+
+\subsubsection{Hovedmenu}
+Filen \textit{main\_menu.c} indeholder to funktioner. Den ene håndterer al logikken bag hovedmenuen, og den anden bruges til at tegne vinduerne på skærmen. Når spillet initialiseres, sættes \textit{nav} til 0. Dette fører spilleren ind i hovedmenuen.\\
+Udover at initialisere hovedmenuens grafik indeholder filen en while-løkke og en integer, \textit{z}. Variablen \textit{z} opdateres i while-løkken afhængigt af funktionen read\_joystick, som aflæser positionen af 30010-joysticket i realtid. Variablen \textit{z} styrer også de visuelle input, der hjælper spilleren med at indikere, hvilken menu der vælges.\\
+Derudover indeholder while-løkken to if-sætninger, der tjekker værdien af \textit{z} og inputtet fra read\_button, som er en funktion fra joystick\_reader.c. Kombinationen af disse to afgør, hvad \textit{nav} sættes til, og dermed hvilken menu spilleren føres ind i.
+
+\subsubsection{Spilmenu}
+Filen \textit{game\_menu.c} indeholder to funktioner: Funktionen \textit{game\_menu()} indeholder al initialisering, der er relevant for spilstyring, grafik og andre elementer. Derudover indeholder den en while-løkke, der opdaterer alt fra kollisionsmekanik til LCD-skærmen. Denne while-løkke brydes først, når spillerens liv når nul. Herefter initialiseres funktionen \textit{game\_over()}, der bruger pointeren \textit{nav}.\\
+Funktionen game\_over har sin egen while-løkke, der tjekker for input fra joysticket og sender spilleren tilbage til hovedmenuen.
+
+\subsubsection{Hjælpemenu}
+Filen \textit{help\_menu.c} indeholder en af de tre menuskærme, der bringer spilleren rundt i spillet. Den indeholder en funktion, der bruger variablen \textit{nav} til at tegne skærmens grafik samt en while-løkke, der tjekker, om knap ét eller to trykkes.\\
+Variablen \textit{nav} angiver en værdi: 0, 1 eller 2, som angiver, hvilken af de tre menuer den skal gå ind i. Herefter bliver man sendt tilbage til hovedmenuen.
+
+\subsubsection{Boss-key/Pauseskærm}
+Filen boss\_key.c indeholder opsætningen af funktionen \textit{boss\_key()}. Funktionen indeholder en if-sætning, der evalueres hver gang game-while-løkken kører. Dette kan ses i game\_menu.c.\\
+Funktionen sætter den globale variabel \textit{cs}, som er spillets timer, på pause. Dette forhindrer spillerens point i at stige, og positionerne af aliens, meteorer og skud ændres ikke. Herefter vises boss-key-skærmen og går ind i en while-løkke, hvor den afventer input fra "knap to". Dette genstarter timeren \textit{cs} og game-løkken, så alt fortsætter fra dér, hvor man var nået til.\\
+Grafikken er udarbejdet ved hjælp af forskellige ASCII-relevante hjemmesider: \cite{Text_to_ASCII_converter} \cite{ASCII_art}.
+
+
+\subsection{Skud}
+\subsubsection{Skudstruktur}
+Skuddets struktur indeholder position, hastighed, hvorvidt skuddet er ”aktivt” eller ej, samt om det er blevet påvirket af tyngdekraft. Disse oplysninger bruges til at håndtere og opdatere skuddets position. Hvis et skud er aktivt, opdateres skuddets position jævnligt ved at addere med hastigheden.
+\begin{lstlisting}[caption={Skudarray kode}] 
+typedef struct {
+    uint8_t bx;
+    uint8_t by;
+    int8_t vx;
+    int8_t vy;
+    uint8_t active;
+    uint8_t gravity;
+} bullet;
+\end{lstlisting}
+
+\subsubsection{Skudvinkler}
+Rumskibet har en variabel, der registrerer den seneste retning, som rumskibet har bevæget sig i (\textit{pos->direction}). Variablen kan have en værdi fra \(1\) til \(8\), som angives af \textit{read\_joystick()}.\\
+Når rumskibet skyder, indstilles skuddets hastighedsvektor ud fra retningsvariablen. Hvis rumskibet for eksempel peger mod højre, sættes hastigheden langs \(x\)-aksen til \(2\) og langs \(y\)-aksen til \(0\). Hvis rumskibet peger skråt ned mod venstre, sættes hastigheden langs \(x\)-aksen til \(-2\) og langs \(y\)-aksen til \(1\).\\
+Eftersom pixlerne fylder dobbelt så meget på \(y\)-aksen som på \(x\)-aksen, er det nødvendigt at fordoble hastigheden langs \(x\)-aksen i forhold til \(y\)-aksen, så alle retninger føles lige hurtige.
+
+\subsubsection{Håndtering af flere skud}
+Muligheden for at affyre flere skud er implementeret ved hjælp af et array. Når spillet startes, oprettes et array, hvor størrelsen er det maksimale antal skud, der kan eksistere samtidigt. Derefter opdateres skuddenes positioner ved at iterere over arrayet og udføre de nødvendige beregninger.\\
+For at sikre jævne opdateringer opdateres skuddene forskudt af hinanden baseret på deres indeks.
+\begin{lstlisting}[caption={Skudarray kode}] 
+bullet bullets_array[MAX_BULLETS];
+\end{lstlisting}
+
+\subsubsection{Kollisionsregistrering}
+Kollisionsregistrering udføres ved at sammenligne positioner med if-sætninger. Da objekternes positioner i spillet (rumskibet, skud, aliens, meteorer) er placeret i det øvre venstre hjørne af objektet, håndteres skudkollision med meteorer som følger:\\
+Hvis skuddets \(x\)-værdi er større end meteorens \(x\)-værdi og mindre end meteorens \(x\)-værdi plus 20, og skuddets \(y\)-værdi er større end meteorens \(y\)-værdi og mindre end meteorens \(y\)-værdi plus 10, udføres udsagnet indeni. I dette tilfælde fjernes skuddet.
+\begin{lstlisting}[caption={Kollisionsregistrering kode}]
+for (uint8_t i = 0; i < MAX_BULLETS; i++) {
+    for (uint8_t j = 0; j < MAX_METEORS; j++) {
+        if ((bullets_array[i].bx >= meteors_array[j].x)
+            && (bullets_array[i].bx < meteors_array[j].x + 20)
+            && (bullets_array[i].by >= meteors_array[j].y)
+            && (bullets_array[i].by < meteors_array[j].y + 10)) {
+            bullets_array[i].active = 0;
+        }
+    }
+}
+\end{lstlisting}
+
+\subsubsection{Tyngdekraftseffekt}
+Tyngdefeltet omkring meteorerne er implementeret på en simpel, men effektiv måde. Det fungerer ved at tjekke, om et skud passerer forbi en meteor inden for en rækkevidde. Hvis det gør, afbøjes skuddet ved at ændre dets hastighedsvektor.\\
+Selvom det ikke er fysisk realistisk, fungerer det godt i spillet, da det er let for computeren at beregne og forudsigeligt for spilleren.\\
+Derudover indeholder skuddets struktur en variabel, der registrerer, om skuddet er blevet påvirket af tyngdekraft, så det ikke afbøjes flere gange.
+\begin{lstlisting}[caption={Tyngdekraftseffekt kode}]
+for (uint8_t i = 0; i < MAX_BULLETS; i++) {
+    if (bullets_array[i].gravity == 0) {
+        for (uint8_t j = 0; j < MAX_METEORS; j++) {
+            if ((bullets_array[i].bx >= meteors_array[j].x - 20) &&
+                (bullets_array[i].bx <= meteors_array[j].x) &&
+                (bullets_array[i].by == meteors_array[j].y + 5)) {
+                
+                bullets_array[i].vx++;
+                bullets_array[i].gravity = 1;
+            }
+        }
+    }
+}
+\end{lstlisting}
+
+\subsubsection{Skudtyper}
+Implementeringen af nye skudtyper er meget ligetil, når skudfunktionaliteten allerede er opsat.\\
+Vores "shotgun" er implementeret ved, at rumskibets retning drejes én gang mod venstre, idet der skydes. Derefter drejes rumskibet én gang mod højre og skyder igen, hvorefter det drejes tilbage og skyder en sidste gang. Dette sker så hurtigt, at spilleren ikke bemærker, at rumskibet drejer og skyder gentagne gange. Resultatet er, at rumskibet praktisk og visuelt skyder tre spredte skud.\\
+Laseren er implementeret anderledes, da programmet undersøger, om der er aliens foran rumskibet, når skuddet affyres. Hvis der er, elimineres de. Derefter vises et blink af en hvid streg på skærmen for at kommunikere visuelt til spilleren, at laseren er blevet affyret.
+
+\subsection{Fjender}
+\subsubsection{Fjendefrembringelse}
+Meteorer og aliens fremkaldes på stort set samme måde: Først tjekkes det, om fjendenummer \(i\) er aktiv. Hvis den ikke er aktiv, sættes dens \(x\)-koordinat til 243, hvilket er den maksimale \(x\)-værdi. Derefter bestemmes dens \(y\)-koordinat "tilfældigt" ved at beregne:
+\[
+cs \bmod \left( (\text{højden af skærmen} - 2) - \text{højden af fjenden} \right) + 1.
+\]
+Dette sikrer, at fjenden ikke genereres for højt eller for lavt, samtidig med at det føles tilfældigt for spilleren. Fjenden sættes derefter til at være aktiv. Når en fjende er aktiv, bevæger den sig mod venstre, og man tager skade af at ramme den med rumskibet.
+
+\subsubsection{Fjendebevægelse}
+Fjender bevæges ved først at slette den bagerste række af deres grafik, hvorefter deres nye position beregnes. Hvis en fjendes nye position er uden for skærmen, sættes fjenden til at være inaktiv, og spilleren mister et liv. Hvis ikke, printes fronten af modstanderen. På denne måde bevæger fjenderne sig glat hen over skærmen ved simple operationer.
+
+\subsubsection{Stigende alienhastighed ved timer}
+Når runden starter, sættes alienes bevægelseshastighed til \(15\). Derefter stiger deres bevægelseshastighed gradvist gennem spillet for at øge sværhedsgraden. Dette implementeres ved at ændre deres opdateringsinterval.
+Al bevægelse i spillet fungerer via opdateringer, hvor hyppigheden af opdateringerne bestemmer bevægelsens hastighed. Derfor nedsættes alienes opdateringsinterval gradvist gennem spillet.
+\begin{lstlisting}[caption={Stigende alienhastighed kode}]
+if (cs % 2500 == 0) {
+    alien_speed--;
+}
+\end{lstlisting}
+
+\subsubsection{Forsinkelser}
+Der er indsatte forsinkelser flere steder i koden for at undgå, at funktioner kaldes for ofte. Dette implementeres ved at sætte en variabel (for eksempel \textit{last\_fire\_time}) til værdien af \textit{cs}, når funktionen kaldes. Næste gang funktionen så kaldes, tjekkes det, om forsinkelsen siden sidste kald er tilstrækkelig til, at funktionen kan kaldes igen.\\
+Dette kan for eksempel ses i funktionerne \textit{fire\_bullet()} og \textit{spawn\_alien()}:
+\begin{lstlisting}[caption={Forsinkelse kode}]
+if (cs - last_fire_time < BULLET_FIRE_DELAY) {
+    return;
+}
+last_fire_time = cs;
+\end{lstlisting}
+
+\subsection{LCD}
+\subsubsection{LCD-skærmens opbygning}
+Vores Liquid-crystal display (LCD) bruges til at vise spillerens liv, point og hvilken skudtype spilleren har aktiveret. Displayet er opdelt i 512 byte, som yderligere er inddelt i 4 rækker med 128 byte hver.\\
+Displayet fungerer ved, at en usigneret 8-bit buffer med 512 bytes hukommelse (\textit{uint8\_t lcd\_buffer[512]}) modtager start-inputtet og ved hjælp af binære tal (omskrevet til hexa-decimaler) angiver, hvad den givne byte skal vise. For eksempel skrives hexadecimalen \textit{0xF7} som \textit{1111 0111} i binært og vil blive vist som en streg, hvor "1"-tallene svarer til tændte (mørke) felter på displayet. Ved at ændre hexadecimale værdier og startpositionen kan funktionen bruges til at tegne statiske figurer, som for eksempel hjerter, tekst eller omridset af den valgte skydetilstand.\\
+For at aktivere displayet skal displayet først initialiseres ved hjælp af funktionen \textit{lcd\_init()}. Derefter bruges \textit{memset(lcd\_buffer, 0x00, 512)} til at nulstille alle 512 bytes i displayet for at undgå ”gryn” på skærmen. Til sidst uploades de ønskede data til displayet ved hjælp af funktionen \textit{lcd\_push\_buffer(lcd\_buffer)}.
+
+\subsubsection{Liv}
+Liv visualiseres med tre hjerter i det øverste venstre hjørne, som opdateres i realtid, når spilleren mister liv i spillet. Funktionen \textit{hearts()} tager en startposition som input og tegner et enkelt hjerte på displayet. Her angiver startpositionen, hvor på displayet hjertet skal placeres. Funktionen benytter en række buffere til at udfylde hjertet kolonne for kolonne. Til sidst holder funktionen \textit{hearts\_left()} styr på antallet af tilbageværende liv og opdaterer displayet med tilføjelse eller fjernelse af hjerter.
+
+\subsubsection{Tekst}
+For at skrive tekst som liv og point på displayet har vi oprettet funktionen \textit{lcd\_write\_string}. Den tager en streng og en startposition som input, og så gennemløber while-løkke strengen karakter for karakter og fortsætter udskrivningsprocessen, så længe strengen ikke er nul. \textit{uint8\_t c = *str++} læser den enkelte karakter i strengen, gemmer den i variablen \textit{c} og går derefter videre til næste karakter. Der trækkes 32 fra \textit{c}, da ASCII-tabellen i \textit{charset.c/h} giver bogstaver fra plads 32.\\
+En for-løkke sørger for at udskrive hver karakter – i dette tilfælde bogstaver – én pixelkolonne ad gangen. Karaktererne genereres ud fra \textit{character\_data}, som er et array i \textit{charset.c}, hvor pixelopbygningen af hver karakter er defineret pixelkolonne for pixelkolonne. Karaktererne er 5 pixelkolonner brede.
+
+\subsubsection{Skud tilstand}
+Funktionen \textit{shooting\_mode\_box()} kommunikerer med den aktuelt aktiverede skudtype via en struktur. Ved at forbinde opsætningen af funktionen \textit{heart()} med if-sætninger kan displayet skifte mellem de tre viste skudtyper. Den samme opsætning bruges i \textit{remove\_shooting\_mode\_box()} til at fjerne gamle linjer, når skudtypen ændres.
+
+\subsubsection{Pointsystem}
+De point, som vises på LCD-skærmen, er knyttet til timeren \textit{cs}. LCD-skærmen opdateres kun, mens spillet er i gang. Når spilleren dør, stopper timeren. Når spillet genstartes, nulstilles timeren (\textit{cs}) til 0, hvilket også nulstiller pointene.
+
+\subsubsection{RGB-LED}
+LED-skærmen på STM32-mikrocontrolleren styres af variablen \textit{health}. Når \textit{health} er 3, lyser LED’en grønt. Ved 2 liv lyser den blåt, og når der kun er 1 liv tilbage, lyser den rødt. Dette implementeres med en funktion, der tager tre binære inputs (\textit{R}, \textit{G} og \textit{B}) og konverterer dem til værdier, som sendes til LED-skærmens GPIO-port.

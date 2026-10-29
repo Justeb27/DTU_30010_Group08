@@ -1,0 +1,11 @@
+Formålet med projektet er at designe og implementere et interaktivt arkadespil ved hjælp af en mikrocontroller baseret på en ARM Cortex-M4 CPU og STM32CubeIDE. Projektet fokuserer ikke kun på at skabe et funktionelt og engagerende spil, men også på at overholde industristandarder for spiludvikling. Derudover analyserer projektet et mellemstort programmeringsproblem og håndterer ressourcer og softwarelag på en struktureret og modulær måde.
+
+Spillet, inspireret af det klassiske arkadespil "Space Invaders", indeholder funktioner som meteorer med simuleret tyngdekraft, otte skudvinkler, power-ups vist på en PC-terminal, samtidigt med at point- og livtracking vist på en LCD-skærm. Disse funktioner styres ved hjælp af timere, interrupts og et eksternt joystick. Implementeringens arkitektur består af et applikationslag, applikationsgrænsefladelag og hardwareabstraktionslag, hvilket sikrer god genbrugelighed, så man nemt kan tilføje eller ændre eksisterende funktioner.
+
+Spillet opfylder de obligatoriske krav i projektbeskrivelsen ved at inkludere følgende funktioner: flere kugler, pointtæller, information via RGB-LED, information på LCD-skærmen på en STM32-mikrocontroller, og spillet styres via et eksternt 30010 joystick, der forbindes til mikrocontrolleren. Disse krav er hovedsageligt valgt, ud fra et formål om at genskabe det meget populære arkadespil "Space Invaders".
+
+Ved at følge programmeringsprincipper, såsom minimal brug af globale variabler og modulær kode, sikrer vi præcision og ydeevne, samtidigt med at koden er fokuseret og overskuelig.
+
+Udover at lave et sjovt og funktionelt spil handler projektet også om at lære, hvordan man arbejder med indlejrede systemer og C-programmering. Projektet har også til formål at lære, hvordan man får joystick, RGB-LED'erne og LCD-skærmen til at arbejde sammen. Projektet handler ikke kun om at skrive C-kode – det handler også om at få funktionerne til at fungere på en mikrocontroller med begrænset RAM og ROM.
+
+Denne rapport dokumenterer designovervejelser, implementering og testprocessen for spillet. Rapporten giver indsigt i udfordringer, der blev mødt, og løsninger, der blev implementeret, samt de overordnede resultater af projektet.
